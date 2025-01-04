@@ -186,6 +186,8 @@ export default {
       this.loading = true;
       listDriver(this.queryParams).then(response => {
         this.driverList = response.rows;
+
+  
         this.total = response.total;
         this.loading = false;
       });

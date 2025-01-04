@@ -74,7 +74,15 @@
 
     <el-table v-loading="loading" :data="truckList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="id" align="center" prop="id" />
+      <!-- 行号列 -->
+  <el-table-column 
+    label="序号" 
+    align="center" 
+    width="80">
+    <template slot-scope="scope">
+      {{ (queryParams.pageNum - 1) * queryParams.pageSize + scope.$index + 1 }}
+    </template>
+  </el-table-column>
       <el-table-column label="车辆类型名称" align="center" prop="truckTypeName" />
       <el-table-column label="车牌号码" align="center" prop="licensePlate" />
       <el-table-column label="司机数量" align="center" prop="driverNum" />
@@ -82,6 +90,20 @@
       <el-table-column label="准载重量" align="center" prop="allowableLoad" />
       <el-table-column label="准载体积" align="center" prop="allowableVolume" />
       <el-table-column label="车辆状态" align="center" prop="status" />
+
+      <!-- 添加一个新的状态控制列 -->
+      <el-table-column label="状态控制" align="center">
+        <template slot-scope="scope">
+          <el-switch
+            v-model="scope.row.status"
+            :active-value="'可用'"
+            :inactive-value="'停用'"
+            @change="handleToggleSwitch(scope.row)"
+            active-text=""
+            inactive-text=""
+          />
+        </template>
+      </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -98,6 +120,7 @@
             @click="handleDelete(scope.row)"
             v-hasPermi="['system:truck:remove']"
           >删除</el-button>
+        
         </template>
       </el-table-column>
     </el-table>
@@ -215,6 +238,10 @@ export default {
       }
       );
   },
+  /** 获取车辆详情 */
+  fetchTruckData(id) {
+    return getTruck(id).then(response => response.data);
+  },
    // 处理车辆类型选择
    handleTruckTypeChange(selectedName) {
       const selectedType = this.truckTypeList.find(item => item.name === selectedName);
@@ -284,16 +311,16 @@ export default {
       this.open = true;
       this.title = "添加车辆管理";
     },
-    /** 修改按钮操作 */
-    handleUpdate(row) {
-      this.reset();
-      const id = row.id || this.ids
-      getTruck(id).then(response => {
-        this.form = response.data;
-        this.open = true;
-        this.title = "修改车辆管理";
-      });
-    },
+     /** 修改按钮操作 */
+  handleUpdate(row) {
+    this.reset();
+    const id = row.id || this.ids;
+    this.fetchTruckData(id).then(data => {
+      this.form = data;
+      this.open = true;
+      this.title = "修改车辆管理";
+    });
+  },
     /** 提交按钮 */
     submitForm() {
       this.$refs["form"].validate(valid => {
@@ -314,6 +341,39 @@ export default {
         }
       });
     },
+    /** 启停按钮操作 */
+handleToggleSwitch(row) {
+  const id = row.id;
+  
+  this.fetchTruckData(id).then(data => {
+    // 确保 status 为数字类型
+    const currentStatus = typeof data.status === 'string' ? (data.status === "可用" ? 0 : 1) : data.status;
+
+    const newStatus = currentStatus === 0 ? "停用" : "可用"; // 切换目标状态
+    const newStatusValue = newStatus === "可用" ? 0 : 1; // 使用 0 或 1 来表示状态
+
+    // 弹窗确认操作
+    this.$modal
+      .confirm(`确定将车辆状态切换为 "${newStatus}" 吗？`)
+      .then(() => {
+        // 更新状态
+        const updatedData = { ...data, status: newStatusValue };  // 使用数字状态
+        console.log("更新的数据:", updatedData);  // 确认传递的数据
+
+        // 调用 updateTruck 方法更新后端数据
+        return updateTruck(updatedData);
+      })
+      .then(() => {
+        this.$modal.msgSuccess(`车辆状态已切换为 "${newStatus}"`);
+        this.getList(); // 刷新表格
+      })
+      .catch(() => {
+        this.$modal.msgError("状态切换操作已取消！");
+      });
+  });
+},
+
+
     /** 删除按钮操作 */
     handleDelete(row) {
       const ids = row.id || this.ids;
@@ -329,7 +389,7 @@ export default {
       this.download('system/truck/export', {
         ...this.queryParams
       }, `truck_${new Date().getTime()}.xlsx`)
-    }
+    },
   }
 };
 </script>
