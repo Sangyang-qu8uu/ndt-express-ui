@@ -15,6 +15,20 @@ export function formatDate(cellValue) {
   return year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds
 }
 
+
+// 时间戳转时间  年/月/日 时:分:秒
+export function getHMS (timestamp) {
+  const date = new Date(timestamp) // 时间戳为10位需*1000，时间戳为13位的话不需乘1000
+  const Y = date.getFullYear() + '-'
+  const M = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '-'
+  const D = (date.getDate() < 10 ? '0' + (date.getDate()) : date.getDate()) + ' '
+
+  const h = (date.getHours() < 10 ? '0' + (date.getHours()) : date.getHours()) + ':'
+  const m = (date.getMinutes() < 10 ? '0' + (date.getMinutes()) : date.getMinutes()) + ':'
+  const s = (date.getSeconds() < 10 ? '0' + (date.getSeconds()) : date.getSeconds())
+  return Y + M + D + h + m + s
+}
+
 /**
  * @param {number} time
  * @param {string} option
