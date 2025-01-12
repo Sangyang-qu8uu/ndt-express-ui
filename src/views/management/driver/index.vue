@@ -180,7 +180,10 @@ export default {
         this.driverList = response.rows.map(driver => {
           // 判断workStatus并修改为对应的文本
           driver.workStatus = driver.workStatus === 0 ? '上班' : '休息';
-          this.formData.id=driver.driverInfoId;
+          if(driver.driverInfoId){
+            this.formData.id=driver.driverInfoId;
+          }
+         
           return driver;
         });
         this.total = response.total;
@@ -191,6 +194,7 @@ export default {
     cancel() {
       this.open = false;
       this.reset();
+      this.resetBasic();
     },
     // 表单重置
     reset() {
@@ -206,6 +210,7 @@ export default {
         updateTime: null
       };
       this.resetForm("form");
+
     },
 
     //证件信息
@@ -299,6 +304,7 @@ export default {
       this.formData.flag = row.flag;
         //如果是修改还需要回显
         if (this.formData.flag) {
+       
         getInfo(this.formData.id).then(response => {
         this.formData = response.data;
         this.title = "修改证件基本信息";

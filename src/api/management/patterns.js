@@ -17,6 +17,14 @@ export function getPattern(id) {
   })
 }
 
+// 查询工作模式模板
+export function patternAll() {
+  return request({
+    url: '/system/pattern/all',
+    method: 'get'
+  })
+}
+
 // 新增工作模式
 export function addPattern(data) {
   return request({
