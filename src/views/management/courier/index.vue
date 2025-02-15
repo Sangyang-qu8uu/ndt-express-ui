@@ -174,9 +174,12 @@ export default {
         courierAccount: [
           { required: true, message: "快递员账号不能为空", trigger: "blur" }
         ],
-        workStatus: [
-          { required: true, message: "工作状态不能为空", trigger: "change" }
+        courierName: [
+          { required: true, message: "快递员名字不能为空", trigger: "blur" }
         ],
+        phone: [
+          { required: true, message: "手机号不能为空", trigger: "blur" }
+        ]
       }
     };
   },

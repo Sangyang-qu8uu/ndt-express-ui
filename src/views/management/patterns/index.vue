@@ -79,7 +79,7 @@
     />
 
     <!-- 添加或修改工作模式对话框 -->
-    <el-dialog :title="type === 'add' ? '新增工作模式' : '编辑工作模式'" :visible.sync="open" width="500px" :before-close="handleClose" append-to-body>
+    <el-dialog :title="type === 'add' ? '新增工作模式' : '编辑工作模式'" :visible.sync="open" width="560px" :before-close="handleClose" append-to-body>
       <el-tabs v-model="workPatternType" class="tab-box" @tab-click="handleClick">
         <el-tab-pane v-if="
                 (this.workPatternType === '1' && this.type === 'edit') ||
@@ -91,7 +91,7 @@
             <el-form-item label="工作模式名称：" prop="name" style="margin-bottom: 0px">
               <el-input v-model="weekParams.name" placeholder="请填写工作模式名称"></el-input>
             </el-form-item>
-            <el-form-item label="连续工作天数：" prop="workDay" style="margin-bottom: 0px" class="workDay">
+            <el-form-item label="连续工作天数：" prop="workDay" style="margin-bottom: 15px" class="workDay">
               <el-checkbox-group v-model="weekParams.workDay" @change="handleCheckedChange">
                 <el-checkbox v-for="day in weekList" :key="day" :label="day">{{ day }}</el-checkbox>
               </el-checkbox-group>
@@ -191,7 +191,13 @@ export default {
           { required: true, message: '工作模式名称不能为空', trigger: 'blur' }
         ],
         workDay: [
-          { required: true, validator: this.validateWorkDay, trigger: 'blur' }
+          { required: true, validator: this.validateWorkDay, trigger: 'blur' },
+        ],
+        workDay: [
+        { required: true, message: '连续工作天数不能为空', trigger: 'blur' }
+        ],
+        dateRange: [
+          { required: true, message: '工作时间不能为空', trigger: 'blur' }
         ]
       },
 
