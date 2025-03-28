@@ -68,14 +68,16 @@
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
 
         <el-form-item class="work-type">
-          <el-radio v-model="workPatternType" label="1" @change="handleWorkType">礼拜制</el-radio>
-          <el-radio v-model="workPatternType" label="2" @change="handleWorkType">连续制</el-radio>
+          <el-radio-group v-model="form.workPatternType"  @change="handleWorkType">
+            <el-radio label="1">礼拜制</el-radio>
+            <el-radio label="2">连续制</el-radio>
+          </el-radio-group>
         </el-form-item>
         <el-form-item label="工作模式:" prop="workPatternId">
-          <el-select v-model="workHistoryId" placeholder="请选择" class="history-name" @change="handleSelect">
+          <el-select v-model="form.workPatternId" placeholder="请选择" class="history-name" @change="handleSelect">
             <el-option
               v-for="item in workPatternType === '1' ? dialogWorkManageWeekList : dialogWorkManageContinuousList"
-              :key="item.id" :label="item.name" :value="item.id">
+              :key="item.id" :label="item.name" :value="item.name">
             </el-option>
           </el-select>
         </el-form-item>
@@ -156,6 +158,7 @@ export default {
   methods: {
     // 更改为选中的内容
     handleWorkType(val) {
+      this.form.workPatternId = null
       this.workPatternType = val
     },
     handleSelect(val) {
@@ -297,6 +300,7 @@ export default {
     submitForm() {
       this.$refs["form"].validate(valid => {
         if (valid) {
+          console.log('this.form', this.form);
           if (this.form.id != null) {
             updateScheduling(this.form).then(response => {
               this.$modal.msgSuccess("修改成功");

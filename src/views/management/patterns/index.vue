@@ -2,12 +2,7 @@
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="100px">
       <el-form-item label="工作模式名称" prop="name">
-        <el-input
-          v-model="queryParams.name"
-          placeholder="请输入工作模式名称"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+        <el-input v-model="queryParams.name" placeholder="请输入工作模式名称" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
 
       <el-form-item>
@@ -18,14 +13,8 @@
 
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="el-icon-plus"
-          size="mini"
-          @click="handleAdd"
-          v-hasPermi="['system:pattern:add']"
-        >添加工作模式
+        <el-button type="primary" plain icon="el-icon-plus" size="mini" @click="handleAdd"
+          v-hasPermi="['system:pattern:add']">添加工作模式
         </el-button>
       </el-col>
 
@@ -33,61 +22,46 @@
     </el-row>
 
     <el-table v-loading="loading" :data="patternList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center"/>
-      <el-table-column label="工作模式编号" align="center" prop="id"/>
-      <el-table-column label="工作模式名称" align="center" prop="name"/>
-      <el-table-column label="工作模式类型" align="center" prop="workPatternType"/>
-      <el-table-column label="工作日期" align="center" prop="workDate"/>
+      <el-table-column type="selection" width="55" align="center" />
+      <el-table-column label="工作模式编号" align="center" prop="id" />
+      <el-table-column label="工作模式名称" align="center" prop="name" />
+      <el-table-column label="工作模式类型" align="center" prop="workPatternType" />
+      <el-table-column label="工作日期" align="center" prop="workDate" />
       <el-table-column label="工作时间" align="center">
         <template slot-scope="scope">
-                <span>{{
-                    (
-                      (scope.row.workEndMinute1 - scope.row.workStartMinute1) /
-                      60
-                    ).toFixed(2)
-                  }}小时</span>
+          <span>{{
+            (
+              (scope.row.workEndMinute1 - scope.row.workStartMinute1) /
+              60
+            ).toFixed(2)
+          }}小时</span>
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-edit"
-            @click="handleEdit(scope.row)"
-            v-hasPermi="['system:pattern:edit']"
-          >修改
+          <el-button size="mini" type="text" icon="el-icon-edit" @click="handleEdit(scope.row)"
+            v-hasPermi="['system:pattern:edit']">修改
           </el-button>
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['system:pattern:remove']"
-          >删除
+          <el-button size="mini" type="text" icon="el-icon-delete" @click="handleDelete(scope.row)"
+            v-hasPermi="['system:pattern:remove']">删除
           </el-button>
         </template>
       </el-table-column>
     </el-table>
 
-    <pagination
-      v-show="total>0"
-      :total="total"
-      :page.sync="queryParams.pageNum"
-      :limit.sync="queryParams.pageSize"
-      @pagination="getList"
-    />
+    <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize"
+      @pagination="getList" />
 
     <!-- 添加或修改工作模式对话框 -->
-    <el-dialog :title="type === 'add' ? '新增工作模式' : '编辑工作模式'" :visible.sync="open" width="560px" :before-close="handleClose" append-to-body>
+    <el-dialog :title="type === 'add' ? '新增工作模式' : '编辑工作模式'" :visible.sync="open" width="560px"
+      :before-close="handleClose" append-to-body>
       <el-tabs v-model="workPatternType" class="tab-box" @tab-click="handleClick">
         <el-tab-pane v-if="
-                (this.workPatternType === '1' && this.type === 'edit') ||
-                  this.type === 'add'
-              " label="礼拜制" name="1">
+          (this.workPatternType === '1' && this.type === 'edit') ||
+          this.type === 'add'
+        " label="礼拜制" name="1">
           <el-form ref="dataForm" :rules="ruleInline" :model="weekParams" label-position="right" label-width="130px"
-                   style="width: 100%"
-          >
+            style="width: 100%">
             <el-form-item label="工作模式名称：" prop="name" style="margin-bottom: 0px">
               <el-input v-model="weekParams.name" placeholder="请填写工作模式名称"></el-input>
             </el-form-item>
@@ -99,59 +73,44 @@
             <div class="tips">选中为工作时间，未选中为休息时间</div>
             <el-form-item label="工作时间：" prop="dateRange">
               <el-time-picker v-model="weekParams.dateRange" is-range range-separator="至" start-placeholder="开始日期"
-                              end-placeholder="结束日期" format="HH:mm" :editable="false" @change="handleDate"
-              >
+                end-placeholder="结束日期" format="HH:mm" :editable="false" @change="handleDate">
               </el-time-picker>
             </el-form-item>
           </el-form>
         </el-tab-pane>
-        <el-tab-pane label="连续制"  v-if="
-                (this.workPatternType === '2' && this.type === 'edit') ||
-                  this.type === 'add'
-              " name="2">
-          <el-form ref="dataForm1" :rules="ruleInline2" :model="continuousParams" label-position="right" label-width="130px"
-                   style="width: 100%"
-          >
+        <el-tab-pane label="连续制" v-if="
+          (this.workPatternType === '2' && this.type === 'edit') ||
+          this.type === 'add'
+        " name="2">
+          <el-form ref="dataForm1" :rules="ruleInline2" :model="continuousParams" label-position="right"
+            label-width="130px" style="width: 100%">
             <el-form-item label="工作模式名称：" prop="name" style="margin-bottom: 15px">
               <el-input v-model="continuousParams.name" placeholder="请填写工作模式名称"></el-input>
             </el-form-item>
             <el-form-item label="连续工作天数：" prop="workDay" style="margin-bottom: 15px">
               上
               <el-input v-model="continuousParams.workDayNum" placeholder="请输入"
-                        style="width: 110px; margin-right: 21px; margin-left: 10px"
-              >
-                    <span
-                      slot="suffix"
-                      style="
+                style="width: 110px; margin-right: 21px; margin-left: 10px">
+                <span slot="suffix" style="
                       color: #20232a;
                       font-weight: 400;
                       font-size: 14px;
                       font-family: PingFangSC, PingFangSC-Regular;
                       margin-right: 14px;
-                      "
-                    >天</span></el-input>
+                      ">天</span></el-input>
               休
-              <el-input
-                v-model="continuousParams.restDayNum"
-                placeholder="请输入"
-                style="width: 110px; margin-left: 10px"
-              >
-                    <span
-                      slot="suffix"
-                      style="
+              <el-input v-model="continuousParams.restDayNum" placeholder="请输入" style="width: 110px; margin-left: 10px">
+                <span slot="suffix" style="
                         color: #20232a;
                         font-weight: 400;
                         font-size: 14px;
                         font-family: PingFangSC, PingFangSC-Regular;
                         margin-right: 14px;
-                      "
-                    >天</span></el-input>
+                      ">天</span></el-input>
             </el-form-item>
             <el-form-item label="工作时间：" prop="dateRange2">
-              <el-time-picker v-model="continuousParams.dateRange" is-range range-separator="至"
-                              start-placeholder="开始日期" end-placeholder="结束日期" format="HH:mm" :editable="false"
-                              @change="handleDate"
-              >
+              <el-time-picker v-model="continuousParams.dateRange" is-range range-separator="至" start-placeholder="开始日期"
+                end-placeholder="结束日期" format="HH:mm" :editable="false" @change="handleDate">
               </el-time-picker>
             </el-form-item>
           </el-form>
@@ -194,7 +153,7 @@ export default {
           { required: true, validator: this.validateWorkDay, trigger: 'blur' },
         ],
         workDay: [
-        { required: true, message: '连续工作天数不能为空', trigger: 'blur' }
+          { required: true, message: '连续工作天数不能为空', trigger: 'blur' }
         ],
         dateRange: [
           { required: true, message: '工作时间不能为空', trigger: 'blur' }
@@ -337,29 +296,41 @@ export default {
     },
     // 表单重置
     reset() {
-      this.form = {
-        id: null,
-        name: null,
-        userType: null,
-        workPatternType: null,
-        monday: null,
-        tuesday: null,
-        wednesday: null,
-        thursday: null,
-        friday: null,
-        saturday: null,
-        sunday: null,
-        workDayNum: null,
-        restDayNum: null,
-        workStartMinute1: null,
-        workEndMinute1: null,
-        status: null,
-        createBy: null,
-        createTime: null,
-        updateBy: null,
-        updateTime: null
+      if (this.workPatternType === '2') {
+        this.continuousParams = {
+          name: '',
+          workPatternType: '',
+          workEndMinute1: new Date(2016, 9, 10, 18, 0).getTime(),
+          workStartMinute1: new Date(2016, 9, 10, 9, 0).getTime(),
+          restDayNum: '', // 休息天数
+          workDayNum: '', // 上班天数
+          dateRange: [
+            new Date(2016, 9, 10, 9, 0).getTime(),
+            new Date(2016, 9, 10, 18, 0).getTime()
+          ]
+        }
+        this.resetForm('dataForm1')
+      } else {
+        this.weekParams = {
+          name: '', // 工作模式名称
+          workEndMinute1: new Date(2016, 9, 10, 18, 0).getTime(), // 工作结束时间,2016年9月10号18点至此刻的毫秒数
+          workStartMinute1: new Date(2016, 9, 10, 9, 0).getTime(), // 工作开始时间，2016年9月10号9点至此刻的毫秒数
+          workPatternType: '', // 工作类型
+          monday: '',
+          tuesday: '',
+          wednesday: '',
+          thursday: '',
+          friday: '',
+          saturday: '',
+          sunday: '',
+          dateRange: [
+            new Date(2016, 9, 10, 9, 0).getTime(),
+            new Date(2016, 9, 10, 18, 0).getTime()
+          ],
+          workDay: []
+        }
+        this.resetForm('dataForm')
       }
-      this.resetForm('form')
     },
     /** 搜索按钮操作 */
     handleQuery() {
@@ -381,6 +352,7 @@ export default {
     handleAdd() {
       this.open = true
       this.type = 'add'
+      this.reset()
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
@@ -398,10 +370,10 @@ export default {
     submitForm() {
       this.$refs[
         this.workPatternType === '1' ? 'dataForm' : 'dataForm1'
-        ].validate(async (valid) => {
+      ].validate(async (valid) => {
         if (valid) {
           const params = this.dealWithParams(this.type, this.workPatternType)
-          console.log("121212",this.type)
+          console.log("121212", this.type)
           if (this.type === 'edit') {
             console.log('修改的json数据：{}', params)
             updatePattern(Object.assign(params, { id: this.id })).then(response => {
@@ -411,7 +383,7 @@ export default {
               this.handleClose()
             })
           } else {
-            console.log("新增的json数据：{}",params)
+            console.log("新增的json数据：{}", params)
             addPattern(params).then(response => {
               this.$modal.msgSuccess('新增成功')
               this.open = false
@@ -425,7 +397,7 @@ export default {
     /** 删除按钮操作 */
     handleDelete(row) {
       const ids = row.id || this.ids
-      this.$modal.confirm('是否确认删除工作模式编号为"' + ids + '"的数据项？').then(function() {
+      this.$modal.confirm('是否确认删除工作模式编号为"' + ids + '"的数据项？').then(function () {
         return delPattern(ids)
       }).then(() => {
         this.getList()
@@ -444,7 +416,7 @@ export default {
         return {
           name: this.weekParams.name,
           workEndMinute1:
-          // 此处需要将时间转为距离当天0点0分的分钟数的差值
+            // 此处需要将时间转为距离当天0点0分的分钟数的差值
             (this.weekParams.workEndMinute1 -
               new Date(2016, 9, 10, 0, 0).getTime()) /
             1000 /
@@ -494,59 +466,59 @@ export default {
       this.type = 'edit'
       const id = row.id || this.ids
       const { data: res } = await getPattern(id)
-        console.log('编辑时查询单条数据:', res)
-        this.workPatternType = res.workPatternType
-        this.id = res.id
-      console.log("id",id)
-        if (res.workPatternType === '1') {
-          this.weekParams = {
-            name: res.name,
-            dateRange: [
-              new Date(2016, 9, 10, 0, 0).getTime() + res.workStartMinute1 * 60 * 1000,
-              new Date(2016, 9, 10, 0, 0).getTime() + res.workEndMinute1 * 60 * 1000
-            ],
-            workPatternType: res.workPatternType,
-            workEndMinute1:
-              new Date(2016, 9, 10, 0, 0).getTime() + res.workEndMinute1 * 60 * 1000,
-            workStartMinute1:
-              new Date(2016, 9, 10, 0, 0).getTime() + res.workStartMinute1 * 60 * 1000,
-            monday: res.monday,
-            tuesday: res.tuesday,
-            wednesday: res.wednesday,
-            thursday: res.thursday,
-            friday: res.friday,
-            saturday: res.saturday,
-            sunday: res.sunday,
-            workDay: [
-              res.monday === '1' ? '周一' : '',
-              res.tuesday === '1' ? '周二' : '',
-              res.wednesday === '1' ? '周三' : '',
-              res.thursday === '1' ? '周四' : '',
-              res.friday === '1' ? '周五' : '',
-              res.saturday === '1' ? '周六' : '',
-              res.sunday === '1' ? '周日' : ''
-            ]
-          }
-        } else {
-          this.continuousParams = {
-            name: res.name,
-            workPatternType: res.workPatternType,
-            workEndMinute1:
-              new Date(2016, 9, 10, 0, 0).getTime() +
-              res.workEndMinute1 * 60 * 1000,
-            workStartMinute1:
-              new Date(2016, 9, 10, 0, 0).getTime() +
-              res.workStartMinute1 * 60 * 1000,
-            restDayNum: res.restDayNum,
-            workDayNum: res.workDayNum,
-            dateRange: [
-              new Date(2016, 9, 10, 0, 0).getTime() +
-              res.workStartMinute1 * 60 * 1000,
-              new Date(2016, 9, 10, 0, 0).getTime() +
-              res.workEndMinute1 * 60 * 1000
-            ]
-          }
+      console.log('编辑时查询单条数据:', res)
+      this.workPatternType = res.workPatternType
+      this.id = res.id
+      console.log("id", id)
+      if (res.workPatternType === '1') {
+        this.weekParams = {
+          name: res.name,
+          dateRange: [
+            new Date(2016, 9, 10, 0, 0).getTime() + res.workStartMinute1 * 60 * 1000,
+            new Date(2016, 9, 10, 0, 0).getTime() + res.workEndMinute1 * 60 * 1000
+          ],
+          workPatternType: res.workPatternType,
+          workEndMinute1:
+            new Date(2016, 9, 10, 0, 0).getTime() + res.workEndMinute1 * 60 * 1000,
+          workStartMinute1:
+            new Date(2016, 9, 10, 0, 0).getTime() + res.workStartMinute1 * 60 * 1000,
+          monday: res.monday,
+          tuesday: res.tuesday,
+          wednesday: res.wednesday,
+          thursday: res.thursday,
+          friday: res.friday,
+          saturday: res.saturday,
+          sunday: res.sunday,
+          workDay: [
+            res.monday === '1' ? '周一' : '',
+            res.tuesday === '1' ? '周二' : '',
+            res.wednesday === '1' ? '周三' : '',
+            res.thursday === '1' ? '周四' : '',
+            res.friday === '1' ? '周五' : '',
+            res.saturday === '1' ? '周六' : '',
+            res.sunday === '1' ? '周日' : ''
+          ]
         }
+      } else {
+        this.continuousParams = {
+          name: res.name,
+          workPatternType: res.workPatternType,
+          workEndMinute1:
+            new Date(2016, 9, 10, 0, 0).getTime() +
+            res.workEndMinute1 * 60 * 1000,
+          workStartMinute1:
+            new Date(2016, 9, 10, 0, 0).getTime() +
+            res.workStartMinute1 * 60 * 1000,
+          restDayNum: res.restDayNum,
+          workDayNum: res.workDayNum,
+          dateRange: [
+            new Date(2016, 9, 10, 0, 0).getTime() +
+            res.workStartMinute1 * 60 * 1000,
+            new Date(2016, 9, 10, 0, 0).getTime() +
+            res.workEndMinute1 * 60 * 1000
+          ]
+        }
+      }
     },
     // 关闭弹窗
     handleClose() {
